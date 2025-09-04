@@ -6,6 +6,7 @@
   --accent: #7c3aed;
   --accent2: #c084fc;
   --accent3: #a78bfa;
+  --accent-bg: rgba(124, 58, 237, 0.1);
 }
 html[data-theme='light'] {
   --bg: #f6e6ff;
@@ -17,6 +18,7 @@ html[data-theme='light'] {
   --accent3: #f472b6;
   --input-bg: #f8f0fc;
   --input-border: #c084fc;
+  --accent-bg: rgba(192, 132, 252, 0.1);
 }
 html[data-theme='light'] a {
   color: var(--accent2);
@@ -101,6 +103,21 @@ button.ghost {
   background: transparent;
   color: var(--muted);
   border: 1px solid var(--input-border, #263043);
+}
+.filter-button {
+  padding: 4px 8px;
+  border: 1px solid var(--input-border, #263043);
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+.filter-button.active {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
 }
 .row {
   display: flex;

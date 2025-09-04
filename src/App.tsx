@@ -3,10 +3,10 @@ import { PantryDB, PantryItem, nowIso, upsertItemsBulk } from './db';
 
 type Filter = {
   query: string;
-  status: 'all' | 'ok' | 'low' | 'expired';
+  statuses: string[];
 };
 
-const defaultFilter: Filter = { query: '', status: 'all' };
+const defaultFilter: Filter = { query: '', statuses: [] };
 
 export function App() {
   const [items, setItems] = useState<PantryItem[]>([]);
@@ -57,13 +57,12 @@ export function App() {
         const expired = i.expiresAt ? new Date(i.expiresAt) < today : false;
         const low = i.quantity <= (i.minThreshold ?? 0);
         const matchesStatus =
-          filter.status === 'all'
-            ? true
-            : filter.status === 'expired'
-              ? expired
-              : filter.status === 'low'
-                ? low && !expired
-                : !expired && !low;
+          filter.statuses.length === 0 ||
+          filter.statuses.some((s) => {
+            if (s === 'expired') return expired;
+            if (s === 'low') return low && !expired;
+            return false;
+          });
         return matchesQuery && matchesStatus;
       })
       .sort((a, b) => a.name.localeCompare(b.name));
@@ -250,7 +249,6 @@ function Filters({ value, onChange }: { value: Filter; onChange: (f: Filter) => 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <label style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <span style={{ fontSize: 12 }}>Filter by name or tag</span>
         <input
           placeholder="Start typing an item name or tag"
           value={value.query}
@@ -259,16 +257,30 @@ function Filters({ value, onChange }: { value: Filter; onChange: (f: Filter) => 
         />
       </label>
       <label style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <span style={{ fontSize: 12 }}>Status</span>
-        <select
-          value={value.status}
-          onChange={(e) => onChange({ ...value, status: e.target.value as any })}
-        >
-          <option value="all">All</option>
-          <option value="ok">OK</option>
-          <option value="low">Low</option>
-          <option value="expired">Expired</option>
-        </select>
+        <span style={{ display: 'flex', gap: 4 }}>
+          <button
+            className={`filter-button ${value.statuses.includes('low') ? 'active' : ''}`}
+            onClick={() => {
+              const newStatuses = value.statuses.includes('low')
+                ? value.statuses.filter((s) => s !== 'low')
+                : [...value.statuses, 'low'];
+              onChange({ ...value, statuses: newStatuses });
+            }}
+          >
+            Low
+          </button>
+          <button
+            className={`filter-button ${value.statuses.includes('expired') ? 'active' : ''}`}
+            onClick={() => {
+              const newStatuses = value.statuses.includes('expired')
+                ? value.statuses.filter((s) => s !== 'expired')
+                : [...value.statuses, 'expired'];
+              onChange({ ...value, statuses: newStatuses });
+            }}
+          >
+            Expired
+          </button>
+        </span>
       </label>
     </div>
   );
