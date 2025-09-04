@@ -48,7 +48,7 @@ function createDemoItems(): PantryItem[] {
   ];
 }
 
-export interface PantryDb {
+export interface PantryStore {
   add: (item: Omit<PantryItem, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   edit: (id: string, patch: Partial<PantryItem>) => Promise<void>;
   remove: (id: string) => Promise<void>;
@@ -56,7 +56,7 @@ export interface PantryDb {
   items: PantryItem[];
 }
 
-export function usePantryStore() {
+export function usePantryStore(): PantryStore {
   const [items, setItems] = useState<PantryItem[]>([]);
 
   const [db] = useState(() => new PantryDB());
