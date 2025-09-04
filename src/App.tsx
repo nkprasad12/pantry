@@ -146,6 +146,11 @@ export function App() {
     setItems(await db.getAll());
   }
 
+  const [showAdd, setShowAdd] = useState(false);
+  // Calculate summary info
+  const totalCount = items.length;
+  const lowCount = items.filter((i) => i.quantity <= (i.minThreshold ?? 0)).length;
+
   return (
     <div className="container">
       <header
@@ -168,9 +173,34 @@ export function App() {
         <Filters categories={categories} value={filter} onChange={setFilter} />
       </div>
 
-      <div className="card" style={{ marginBottom: 12 }}>
-        <ItemForm onSubmit={handleAdd} />
+      <div
+        className="row"
+        style={{ marginBottom: 12, alignItems: 'center', justifyContent: 'space-between' }}
+      >
+        <button
+          className="ghost"
+          onClick={() => setShowAdd((v) => !v)}
+          aria-expanded={showAdd}
+          aria-controls="add-item-form"
+        >
+          {showAdd ? 'Hide Add Item' : 'Add New Item'}
+        </button>
+        <span className="muted" style={{ fontSize: 15 }}>
+          {totalCount} item{totalCount === 1 ? '' : 's'}
+          {lowCount > 0 && (
+            <>
+              {' '}
+              | <span className="danger">{lowCount} low</span>
+            </>
+          )}
+        </span>
       </div>
+
+      {showAdd && (
+        <div className="card" style={{ marginBottom: 12 }} id="add-item-form">
+          <ItemForm onSubmit={handleAdd} />
+        </div>
+      )}
 
       <div className="grid">
         {filtered.map((i) => (
@@ -276,51 +306,60 @@ function ItemForm({
         reset();
       }}
     >
-      <input
-        required
-        placeholder="Item name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        style={{ flex: 2, minWidth: 160 }}
-      />
-      <input
-        placeholder="Category"
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-        style={{ flex: 1, minWidth: 120 }}
-      />
-      <input
-        type="number"
-        min={0}
-        step="any"
-        placeholder="Qty"
-        value={quantity}
-        onChange={(e) => setQuantity(parseFloat(e.target.value))}
-        style={{ width: 100 }}
-      />
-      <input
-        placeholder="Unit"
-        value={unit}
-        onChange={(e) => setUnit(e.target.value)}
-        style={{ width: 90 }}
-      />
-      <input
-        type="number"
-        min={0}
-        step="any"
-        placeholder="Min"
-        value={minThreshold}
-        onChange={(e) => setMinThreshold(parseFloat(e.target.value))}
-        style={{ width: 90 }}
-      />
-      <input type="date" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} />
-      <input
-        placeholder="Notes"
-        value={notes}
-        onChange={(e) => setNotes(e.target.value)}
-        style={{ flex: 1, minWidth: 160 }}
-      />
-      <button type="submit">Add</button>
+      <label style={{ display: 'flex', flexDirection: 'column', flex: 2, minWidth: 160 }}>
+        <span style={{ fontSize: 12 }}>Item name</span>
+        <input
+          required
+          placeholder="Item name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+      </label>
+      <label style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 120 }}>
+        <span style={{ fontSize: 12 }}>Category</span>
+        <input
+          placeholder="Category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        />
+      </label>
+      <label style={{ display: 'flex', flexDirection: 'column', width: 100 }}>
+        <span style={{ fontSize: 12 }}>Qty</span>
+        <input
+          type="number"
+          min={0}
+          step="any"
+          placeholder="Qty"
+          value={quantity}
+          onChange={(e) => setQuantity(parseFloat(e.target.value))}
+        />
+      </label>
+      <label style={{ display: 'flex', flexDirection: 'column', width: 90 }}>
+        <span style={{ fontSize: 12 }}>Unit</span>
+        <input placeholder="Unit" value={unit} onChange={(e) => setUnit(e.target.value)} />
+      </label>
+      <label style={{ display: 'flex', flexDirection: 'column', width: 90 }}>
+        <span style={{ fontSize: 12 }}>Needed</span>
+        <input
+          type="number"
+          min={0}
+          step="any"
+          placeholder="Needed"
+          value={minThreshold}
+          onChange={(e) => setMinThreshold(parseFloat(e.target.value))}
+        />
+      </label>
+      <label style={{ display: 'flex', flexDirection: 'column' }}>
+        <span style={{ fontSize: 12 }}>Expires</span>
+        <input type="date" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} />
+      </label>
+      <label style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 160 }}>
+        <span style={{ fontSize: 12 }}>Notes</span>
+        <input placeholder="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
+      </label>
+      <button type="submit" style={{ alignSelf: 'end', marginTop: 18 }}>
+        Add
+      </button>
     </form>
   );
 }
@@ -344,7 +383,6 @@ function ItemCard({
           <div style={{ fontWeight: 700 }}>{item.name}</div>
           <div className="row" style={{ gap: 6 }}>
             {item.category && <span className="pill">{item.category}</span>}
-            {item.unit && <span className="pill">{item.unit}</span>}
           </div>
         </div>
         <div className="row" style={{ alignItems: 'center', gap: 6 }}>
@@ -354,7 +392,12 @@ function ItemCard({
           >
             -
           </button>
-          <div style={{ minWidth: 36, textAlign: 'center' }}>{item.quantity}</div>
+          <div style={{ minWidth: 36, textAlign: 'center' }}>
+            {item.quantity}
+            {item.unit && (
+              <span style={{ marginLeft: 4, fontSize: 13, color: '#888' }}>{item.unit}</span>
+            )}
+          </div>
           <button
             className="ghost"
             onClick={() => onUpdate(item.id, { quantity: (item.quantity || 0) + 1 })}
@@ -379,8 +422,35 @@ function ItemCard({
           )}
         </div>
         <div className="row">
-          <button className="ghost" onClick={() => onDelete(item.id)}>
-            Remove
+          <button
+            className="ghost"
+            onClick={() => onDelete(item.id)}
+            title="Remove"
+            style={{
+              width: 32,
+              height: 32,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 0,
+            }}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ display: 'block' }}
+              aria-hidden="true"
+            >
+              <rect x="6" y="7.5" width="8" height="8" rx="1.5" />
+              <path d="M8.5 10.5v3m3-3v3M5 7.5h10M9 5.5h2a1 1 0 0 1 1 1v1H8v-1a1 1 0 0 1 1-1z" />
+            </svg>
           </button>
         </div>
       </div>
