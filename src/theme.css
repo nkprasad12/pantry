@@ -164,3 +164,11 @@ html[data-theme='light'] .success {
 a {
   color: #7dd3fc;
 }
+.iconButton {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}

@@ -1,5 +1,9 @@
+import { useState } from 'react';
 import { PantryItem } from '../db';
 import { isLow } from '../utils/misc';
+import { ItemEditView } from './item_edit_view';
+import { Modal } from './modal';
+import { DeleteIcon, EditIcon } from './icons';
 
 export function ItemCard({
   item,
@@ -10,6 +14,8 @@ export function ItemCard({
   onUpdate: (id: string, patch: Partial<PantryItem>) => void;
   onDelete: (id: string) => void;
 }) {
+  const [editing, setEditing] = useState(false);
+
   const today = new Date();
   const expired = item.expiresAt ? new Date(item.expiresAt) < today : false;
   const low = isLow(item);
@@ -32,7 +38,7 @@ export function ItemCard({
             {item.unit && (
               <span style={{ marginLeft: 4, fontSize: 13, color: '#888' }}>{item.unit}</span>
             )}
-            {item.needed && ` / ${item.needed}`}
+            {item.needed && <span style={{ marginLeft: 4, color: '#888' }}>/ {item.needed}</span>}
           </div>
           <button
             className="ghost"
@@ -51,7 +57,7 @@ export function ItemCard({
           {item.expiresAt && (
             <span className={expired ? 'danger' : 'success'}>
               {expired ? 'Expired ' : 'Expires '}
-              {new Date(item.expiresAt).toLocaleDateString()}
+              {new Date(item.expiresAt).toISOString().slice(0, 10)}
             </span>
           )}
           {low && <span className="danger">Low</span>}
@@ -65,39 +71,26 @@ export function ItemCard({
             </span>
           )}
         </div>
-        <div className="row">
-          <button
-            className="ghost"
-            onClick={() => onDelete(item.id)}
-            title="Remove"
-            style={{
-              width: 32,
-              height: 32,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: 0,
-            }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 20 20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{ display: 'block' }}
-              aria-hidden="true"
-            >
-              <rect x="6" y="7.5" width="8" height="8" rx="1.5" />
-              <path d="M8.5 10.5v3m3-3v3M5 7.5h10M9 5.5h2a1 1 0 0 1 1 1v1H8v-1a1 1 0 0 1 1-1z" />
-            </svg>
+        <div className="row" style={{ alignItems: 'center', gap: 8 }}>
+          <button className="ghost iconButton" onClick={() => setEditing(true)} title="Edit">
+            <EditIcon />
+          </button>
+          <button className="ghost iconButton" onClick={() => onDelete(item.id)} title="Remove">
+            <DeleteIcon />
           </button>
         </div>
       </div>
+      {editing && (
+        <Modal onClose={() => setEditing(false)}>
+          <ItemEditView
+            item={item}
+            onCancel={() => setEditing(false)}
+            onSave={(patch) => {
+              if (Object.keys(patch).length > 0) onUpdate(item.id, patch);
+            }}
+          />
+        </Modal>
+      )}
     </div>
   );
 }
