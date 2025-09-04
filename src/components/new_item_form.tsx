@@ -3,9 +3,11 @@ import { PantryItem } from '../db';
 
 export interface NewItemFormProps {
   onSubmit: (item: Omit<PantryItem, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onCancel?: () => void;
+  onSubmittingChange?: (isSubmitting: boolean) => void;
 }
 
-export function NewItemForm({ onSubmit }: NewItemFormProps) {
+export function NewItemForm({ onSubmit, onCancel, onSubmittingChange }: NewItemFormProps) {
   const [name, setName] = useState('');
   const [tagsInput, setTagsInput] = useState('');
   const [quantity, setQuantity] = useState<number>(1);
@@ -13,6 +15,7 @@ export function NewItemForm({ onSubmit }: NewItemFormProps) {
   const [minThreshold, setMinThreshold] = useState<number>(0);
   const [expiresAt, setExpiresAt] = useState<string>('');
   const [notes, setNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   function reset() {
     setName('');
@@ -29,20 +32,27 @@ export function NewItemForm({ onSubmit }: NewItemFormProps) {
       className="row"
       onSubmit={(e) => {
         e.preventDefault();
-        const tags = tagsInput
-          .split(',')
-          .map((t) => t.trim())
-          .filter((t) => t.length > 0);
-        onSubmit({
-          name,
-          tags,
-          quantity,
-          unit,
-          minThreshold,
-          expiresAt: expiresAt ? new Date(expiresAt).toISOString() : undefined,
-          notes,
-        });
-        reset();
+        setIsSubmitting(true);
+        onSubmittingChange?.(true);
+        try {
+          const tags = tagsInput
+            .split(',')
+            .map((t) => t.trim())
+            .filter((t) => t.length > 0);
+          onSubmit({
+            name,
+            tags,
+            quantity,
+            unit,
+            minThreshold,
+            expiresAt: expiresAt ? new Date(expiresAt).toISOString() : undefined,
+            notes,
+          });
+          reset();
+        } finally {
+          setIsSubmitting(false);
+          onSubmittingChange?.(false);
+        }
       }}
     >
       <label style={{ display: 'flex', flexDirection: 'column', flex: 2, minWidth: 160 }}>
@@ -96,9 +106,21 @@ export function NewItemForm({ onSubmit }: NewItemFormProps) {
         <span style={{ fontSize: 12 }}>Notes</span>
         <input placeholder="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
       </label>
-      <button type="submit" style={{ alignSelf: 'end', marginTop: 18 }}>
-        Add
-      </button>
+      <div style={{ display: 'flex', gap: 8, alignSelf: 'end', marginTop: 18 }}>
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Adding...' : 'Add'}
+        </button>
+        <button
+          type="button"
+          className="ghost"
+          onClick={() => {
+            reset();
+            onCancel?.();
+          }}
+        >
+          Cancel
+        </button>
+      </div>
     </form>
   );
 }

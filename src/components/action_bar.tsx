@@ -10,6 +10,7 @@ export interface ActionBarProps {
 
 export function ActionBar({ items, pantry }: ActionBarProps) {
   const [showAdd, setShowAdd] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   // Calculate summary info
   const totalCount = items.length;
   const lowCount = items.filter((i) => i.quantity <= (i.minThreshold ?? 0)).length;
@@ -23,10 +24,11 @@ export function ActionBar({ items, pantry }: ActionBarProps) {
         <button
           className="ghost"
           onClick={() => setShowAdd((v) => !v)}
+          disabled={isSubmitting}
           aria-expanded={showAdd}
           aria-controls="add-item-form"
         >
-          {showAdd ? 'Hide Add Item' : 'Add Item'}
+          Add Item
         </button>
         {/* @ts-ignore */}
         {import.meta.env.DEV && (
@@ -47,7 +49,11 @@ export function ActionBar({ items, pantry }: ActionBarProps) {
 
       {showAdd && (
         <div className="card" style={{ marginBottom: 12 }} id="add-item-form">
-          <NewItemForm onSubmit={pantry.add} />
+          <NewItemForm
+            onSubmit={pantry.add}
+            onCancel={() => setShowAdd(false)}
+            onSubmittingChange={setIsSubmitting}
+          />
         </div>
       )}
     </>
