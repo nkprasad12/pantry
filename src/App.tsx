@@ -3,11 +3,11 @@ import { PantryDB, PantryItem, nowIso, upsertItemsBulk } from './db';
 
 type Filter = {
   query: string;
-  category: string | 'all';
+  tag: string | 'all';
   status: 'all' | 'ok' | 'low' | 'expired';
 };
 
-const defaultFilter: Filter = { query: '', category: 'all', status: 'all' };
+const defaultFilter: Filter = { query: '', tag: 'all', status: 'all' };
 
 export function App() {
   const [items, setItems] = useState<PantryItem[]>([]);
@@ -45,9 +45,10 @@ export function App() {
     }
   }, [theme]);
 
-  const categories = useMemo(() => {
+  // Collect all tags from all items
+  const tags = useMemo(() => {
     const s = new Set<string>();
-    items.forEach((i) => i.category && s.add(i.category));
+    items.forEach((i) => Array.isArray(i.tags) && i.tags.forEach((t: string) => t && s.add(t)));
     return ['all', ...Array.from(s).sort()];
   }, [items]);
 
@@ -57,7 +58,8 @@ export function App() {
     return items
       .filter((i) => {
         const matchesQuery = !q || `${i.name} ${i.notes ?? ''}`.toLowerCase().includes(q);
-        const matchesCat = filter.category === 'all' || i.category === filter.category;
+        const matchesTag =
+          filter.tag === 'all' || (Array.isArray(i.tags) && i.tags.includes(filter.tag));
         const expired = i.expiresAt ? new Date(i.expiresAt) < today : false;
         const low = i.quantity <= (i.minThreshold ?? 0);
         const matchesStatus =
@@ -68,7 +70,7 @@ export function App() {
               : filter.status === 'low'
                 ? low && !expired
                 : !expired && !low;
-        return matchesQuery && matchesCat && matchesStatus;
+        return matchesQuery && matchesTag && matchesStatus;
       })
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [items, filter]);
@@ -170,7 +172,7 @@ export function App() {
       </header>
 
       <div className="card" style={{ marginBottom: 12 }}>
-        <Filters categories={categories} value={filter} onChange={setFilter} />
+        <Filters tags={tags} value={filter} onChange={setFilter} />
       </div>
 
       <div
@@ -227,41 +229,50 @@ function ThemeSwitcher({ theme, setTheme }: { theme: string; setTheme: (t: strin
 }
 
 function Filters({
-  categories,
+  tags,
   value,
   onChange,
 }: {
-  categories: string[];
+  tags: string[];
   value: Filter;
   onChange: (f: Filter) => void;
 }) {
   return (
-    <div className="row">
-      <input
-        placeholder="Search…"
-        value={value.query}
-        onChange={(e) => onChange({ ...value, query: e.target.value })}
-        style={{ flex: 1, minWidth: 220 }}
-      />
-      <select
-        value={value.category}
-        onChange={(e) => onChange({ ...value, category: e.target.value as any })}
-      >
-        {categories.map((c) => (
-          <option key={c} value={c}>
-            {c}
-          </option>
-        ))}
-      </select>
-      <select
-        value={value.status}
-        onChange={(e) => onChange({ ...value, status: e.target.value as any })}
-      >
-        <option value="all">All</option>
-        <option value="ok">OK</option>
-        <option value="low">Low</option>
-        <option value="expired">Expired</option>
-      </select>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <label style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <span style={{ fontSize: 12 }}>Search</span>
+        <input
+          placeholder="Search…"
+          value={value.query}
+          onChange={(e) => onChange({ ...value, query: e.target.value })}
+          style={{ flex: 1, minWidth: 220 }}
+        />
+      </label>
+      <label style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <span style={{ fontSize: 12 }}>Tag</span>
+        <select
+          value={value.tag}
+          onChange={(e) => onChange({ ...value, tag: e.target.value as any })}
+        >
+          {tags.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <span style={{ fontSize: 12 }}>Status</span>
+        <select
+          value={value.status}
+          onChange={(e) => onChange({ ...value, status: e.target.value as any })}
+        >
+          <option value="all">All</option>
+          <option value="ok">OK</option>
+          <option value="low">Low</option>
+          <option value="expired">Expired</option>
+        </select>
+      </label>
     </div>
   );
 }
@@ -272,7 +283,7 @@ function ItemForm({
   onSubmit: (item: Omit<PantryItem, 'id' | 'createdAt' | 'updatedAt'>) => void;
 }) {
   const [name, setName] = useState('');
-  const [category, setCategory] = useState('');
+  const [tagsInput, setTagsInput] = useState('');
   const [quantity, setQuantity] = useState<number>(1);
   const [unit, setUnit] = useState('');
   const [minThreshold, setMinThreshold] = useState<number>(0);
@@ -281,7 +292,7 @@ function ItemForm({
 
   function reset() {
     setName('');
-    setCategory('');
+    setTagsInput('');
     setQuantity(1);
     setUnit('');
     setMinThreshold(0);
@@ -294,9 +305,13 @@ function ItemForm({
       className="row"
       onSubmit={(e) => {
         e.preventDefault();
+        const tags = tagsInput
+          .split(',')
+          .map((t) => t.trim())
+          .filter((t) => t.length > 0);
         onSubmit({
           name,
-          category,
+          tags,
           quantity,
           unit,
           minThreshold,
@@ -316,11 +331,11 @@ function ItemForm({
         />
       </label>
       <label style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 120 }}>
-        <span style={{ fontSize: 12 }}>Category</span>
+        <span style={{ fontSize: 12 }}>Tags</span>
         <input
-          placeholder="Category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
+          placeholder="e.g. grains, staple"
+          value={tagsInput}
+          onChange={(e) => setTagsInput(e.target.value)}
         />
       </label>
       <label style={{ display: 'flex', flexDirection: 'column', width: 100 }}>
@@ -380,10 +395,7 @@ function ItemCard({
     <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <div className="row" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <div style={{ fontWeight: 700 }}>{item.name}</div>
-          <div className="row" style={{ gap: 6 }}>
-            {item.category && <span className="pill">{item.category}</span>}
-          </div>
+          <div style={{ fontWeight: 700, fontSize: 20 }}>{item.name}</div>
         </div>
         <div className="row" style={{ alignItems: 'center', gap: 6 }}>
           <button
@@ -407,17 +419,25 @@ function ItemCard({
         </div>
       </div>
       {item.notes && <div className="muted">{item.notes}</div>}
-      <div className="row" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
-        <div className="muted">
+      <div
+        className="row"
+        style={{ justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}
+      >
+        <div className="muted" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {item.expiresAt && (
             <span className={expired ? 'danger' : 'success'}>
               {expired ? 'Expired ' : 'Expires '}
               {new Date(item.expiresAt).toLocaleDateString()}
             </span>
           )}
-          {low && (
-            <span style={{ marginLeft: 8 }} className="danger">
-              Low
+          {low && <span className="danger">Low</span>}
+          {Array.isArray(item.tags) && item.tags.length > 0 && (
+            <span style={{ display: 'flex', gap: 6, marginLeft: 8 }}>
+              {item.tags.map((tag: string) => (
+                <span className="pill" key={tag}>
+                  {tag}
+                </span>
+              ))}
             </span>
           )}
         </div>

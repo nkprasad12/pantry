@@ -3,7 +3,8 @@ import { openDB, DBSchema, IDBPDatabase } from 'idb';
 export type PantryItem = {
   id: string;
   name: string;
-  category?: string;
+  tags?: string[];
+  category?: string; // deprecated
   quantity: number;
   unit?: string;
   minThreshold?: number;
