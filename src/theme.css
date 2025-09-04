@@ -6,15 +6,6 @@
   --accent: #0ea5a6;
 }
 html[data-theme='light'] {
-  --bg: #f8fafc;
-  --panel: #f1f5f9;
-  --text: #1e293b;
-  --muted: #64748b;
-  --accent: #0ea5a6;
-  --input-bg: #fff;
-  --input-border: #cbd5e1;
-}
-html[data-theme='fun'] {
   --bg: #f6e6ff;
   --panel: #f3d9fa;
   --text: #3a255a;
@@ -25,16 +16,16 @@ html[data-theme='fun'] {
   --input-bg: #f8f0fc;
   --input-border: #c084fc;
 }
-html[data-theme='fun'] a {
+html[data-theme='light'] a {
   color: var(--accent2);
   text-decoration: underline;
 }
-html[data-theme='fun'] .pill {
+html[data-theme='light'] .pill {
   background: var(--accent2);
   color: #fff;
   border: 1px solid var(--accent3);
 }
-html[data-theme='fun'] .muted {
+html[data-theme='light'] .muted {
   color: var(--accent3);
 }
 html,
@@ -127,19 +118,11 @@ button.ghost {
   color: #bbf7d0;
 }
 html[data-theme='light'] .danger {
-  color: #dc2626;
-  font-weight: bold;
-}
-html[data-theme='light'] .success {
-  color: #059669;
-  font-weight: bold;
-}
-html[data-theme='fun'] .danger {
   color: #d72660;
   font-weight: bold;
   text-shadow: 0 1px 2px #fff6;
 }
-html[data-theme='fun'] .success {
+html[data-theme='light'] .success {
   color: #1cb698;
   font-weight: bold;
   text-shadow: 0 1px 2px #fff6;

@@ -16,17 +16,17 @@ export function App() {
   const [theme, setThemeState] = useState(() => {
     if (typeof window !== 'undefined') {
       const stored = window.localStorage.getItem('theme');
-      if (stored === 'light' || stored === 'dark' || stored === 'fun') return stored;
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches)
-        return 'light';
+      if (stored === 'dark' || stored === 'fun') return stored === 'fun' ? 'light' : stored;
     }
     return 'dark';
   });
   // Wrap setTheme to persist
   const setTheme = (t: string) => {
-    setThemeState(t);
+    // If user selects 'fun', treat as 'light'
+    const mapped = t === 'fun' ? 'light' : t;
+    setThemeState(mapped);
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem('theme', t);
+      window.localStorage.setItem('theme', mapped);
     }
   };
 
@@ -39,8 +39,7 @@ export function App() {
     // Also update meta theme-color for mobile
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) {
-      if (theme === 'light') meta.setAttribute('content', '#f8fafc');
-      else if (theme === 'fun') meta.setAttribute('content', '#2a183a');
+      if (theme === 'light') meta.setAttribute('content', '#2a183a');
       else meta.setAttribute('content', '#0f766e');
     }
   }, [theme]);
@@ -170,7 +169,8 @@ export function App() {
               style={{ display: 'block' }}
             />
           </div>
-          <div className="row" style={{ gap: 8 }}>
+          <div className="row" style={{ gap: 8, alignItems: 'center' }}>
+            <span style={{ fontSize: 14 }}>Theme:</span>
             <ThemeSwitcher theme={theme} setTheme={setTheme} />
             {/* @ts-ignore */}
             {import.meta.env.DEV && (
@@ -239,7 +239,6 @@ function ThemeSwitcher({ theme, setTheme }: { theme: string; setTheme: (t: strin
     >
       <option value="dark">Dark</option>
       <option value="light">Light</option>
-      <option value="fun">Fun</option>
     </select>
   );
 }
