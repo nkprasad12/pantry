@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { PantryItem } from '../db';
+import { isLow } from '../utils/misc';
 
 type Filter = {
   query: string;
@@ -68,12 +69,11 @@ export function useItemFilter(items: PantryItem[]): UseItemFilterValue {
             .toLowerCase()
             .includes(q);
         const expired = i.expiresAt ? new Date(i.expiresAt) < today : false;
-        const low = i.quantity <= (i.minThreshold ?? 0);
         const matchesStatus =
           filter.statuses.length === 0 ||
           filter.statuses.some((s) => {
             if (s === 'expired') return expired;
-            if (s === 'low') return low && !expired;
+            if (s === 'low') return isLow(i) && !expired;
             return false;
           });
         return matchesQuery && matchesStatus;

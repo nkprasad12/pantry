@@ -7,7 +7,8 @@ export type PantryItem = {
   category?: string; // deprecated
   quantity: number;
   unit?: string;
-  minThreshold?: number;
+  needed?: number;
+  minThreshold?: number; // deprecated
   expiresAt?: string; // ISO
   notes?: string;
   createdAt: string; // ISO

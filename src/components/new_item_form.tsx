@@ -12,7 +12,7 @@ export function NewItemForm({ onSubmit, onCancel, onSubmittingChange }: NewItemF
   const [tagsInput, setTagsInput] = useState('');
   const [quantity, setQuantity] = useState<number>(1);
   const [unit, setUnit] = useState('');
-  const [minThreshold, setMinThreshold] = useState<number>(0);
+  const [needed, setNeeded] = useState<number>(0);
   const [expiresAt, setExpiresAt] = useState<string>('');
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,7 +22,7 @@ export function NewItemForm({ onSubmit, onCancel, onSubmittingChange }: NewItemF
     setTagsInput('');
     setQuantity(1);
     setUnit('');
-    setMinThreshold(0);
+    setNeeded(0);
     setExpiresAt('');
     setNotes('');
   }
@@ -44,7 +44,7 @@ export function NewItemForm({ onSubmit, onCancel, onSubmittingChange }: NewItemF
             tags,
             quantity,
             unit,
-            minThreshold,
+            needed,
             expiresAt: expiresAt ? new Date(expiresAt).toISOString() : undefined,
             notes,
           });
@@ -72,30 +72,30 @@ export function NewItemForm({ onSubmit, onCancel, onSubmittingChange }: NewItemF
           onChange={(e) => setTagsInput(e.target.value)}
         />
       </label>
+      <label style={{ display: 'flex', flexDirection: 'column', width: 90 }}>
+        <span style={{ fontSize: 12 }}>Unit</span>
+        <input placeholder="Unit" value={unit} onChange={(e) => setUnit(e.target.value)} />
+      </label>
       <label style={{ display: 'flex', flexDirection: 'column', width: 100 }}>
-        <span style={{ fontSize: 12 }}>Qty</span>
+        <span style={{ fontSize: 12 }}>Qty in Pantry</span>
         <input
           type="number"
           min={0}
           step="any"
-          placeholder="Qty"
+          placeholder="Qty in Pantry"
           value={quantity}
           onChange={(e) => setQuantity(parseFloat(e.target.value))}
         />
       </label>
       <label style={{ display: 'flex', flexDirection: 'column', width: 90 }}>
-        <span style={{ fontSize: 12 }}>Unit</span>
-        <input placeholder="Unit" value={unit} onChange={(e) => setUnit(e.target.value)} />
-      </label>
-      <label style={{ display: 'flex', flexDirection: 'column', width: 90 }}>
-        <span style={{ fontSize: 12 }}>Needed</span>
+        <span style={{ fontSize: 12 }}>Qty Needed</span>
         <input
           type="number"
           min={0}
           step="any"
-          placeholder="Needed"
-          value={minThreshold}
-          onChange={(e) => setMinThreshold(parseFloat(e.target.value))}
+          placeholder="Qty Needed"
+          value={needed}
+          onChange={(e) => setNeeded(parseFloat(e.target.value))}
         />
       </label>
       <label style={{ display: 'flex', flexDirection: 'column' }}>

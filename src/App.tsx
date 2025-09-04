@@ -13,12 +13,14 @@ export function App() {
     <>
       <div className="container">
         <Header />
-        {/* The search bar and filters */}
-        <div className="card" style={{ marginBottom: 12 }}>
-          {filter.Widget}
-        </div>
         {/* The action bar, with a summary of contents. */}
-        <ActionBar items={filter.items} pantry={pantry} />
+        <ActionBar pantry={pantry} />
+        {/* The search bar and filters */}
+        {pantry.items.length > 0 && (
+          <div className="card" style={{ marginBottom: 12 }}>
+            {filter.Widget}
+          </div>
+        )}
         {/* The raw contents. */}
         <div className="grid">
           {filter.items.map((i) => (

@@ -1,21 +1,20 @@
 import { useState } from 'react';
-import { PantryItem } from '../db';
 import { NewItemForm } from './new_item_form';
 import { PantryStore } from './use_pantry_db';
+import { isLow } from '../utils/misc';
 
 export interface ActionBarProps {
-  items: PantryItem[];
   pantry: PantryStore;
 }
 
-export function ActionBar({ items, pantry }: ActionBarProps) {
+export function ActionBar({ pantry }: ActionBarProps) {
   const [showAdd, setShowAdd] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Calculate summary info
-  const totalCount = items.length;
-  const lowCount = items.filter((i) => i.quantity <= (i.minThreshold ?? 0)).length;
-  const expiredCount = items.filter(
+  const totalCount = pantry.items.length;
+  const lowCount = pantry.items.filter(isLow).length;
+  const expiredCount = pantry.items.filter(
     (i) => i.expiresAt && new Date(i.expiresAt) < new Date(),
   ).length;
 

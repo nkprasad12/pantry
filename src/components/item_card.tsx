@@ -1,4 +1,5 @@
 import { PantryItem } from '../db';
+import { isLow } from '../utils/misc';
 
 export function ItemCard({
   item,
@@ -11,7 +12,8 @@ export function ItemCard({
 }) {
   const today = new Date();
   const expired = item.expiresAt ? new Date(item.expiresAt) < today : false;
-  const low = item.quantity <= (item.minThreshold ?? 0);
+  const low = isLow(item);
+
   return (
     <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <div className="row" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
@@ -30,6 +32,7 @@ export function ItemCard({
             {item.unit && (
               <span style={{ marginLeft: 4, fontSize: 13, color: '#888' }}>{item.unit}</span>
             )}
+            {item.needed && ` / ${item.needed}`}
           </div>
           <button
             className="ghost"
