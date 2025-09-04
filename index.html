@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pantry Tracker</title>
+    <meta name="theme-color" content="#0f766e" />
+    <style>
+      :root {
+        --bg: #0b1020;
+        --panel: #0f172a;
+        --text: #e5e7eb;
+        --muted: #94a3b8;
+        --accent: #0ea5a6;
+      }
+      html,
+      body,
+      #root {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Ubuntu,
+          Cantarell,
+          Noto Sans,
+          Helvetica Neue,
+          Arial,
+          'Apple Color Emoji',
+          'Segoe UI Emoji';
+      }
+      .container {
+        max-width: 940px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid #1f2937;
+        border-radius: 12px;
+        padding: 16px;
+      }
+      input,
+      select {
+        background: #0b1220;
+        border: 1px solid #263043;
+        color: var(--text);
+        padding: 8px 10px;
+        border-radius: 8px;
+        outline: none;
+      }
+      input:focus,
+      select:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(14, 165, 166, 0.15);
+      }
+      button {
+        background: var(--accent);
+        color: #042f2e;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 14px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      button.ghost {
+        background: transparent;
+        color: var(--muted);
+        border: 1px solid #263043;
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 12px;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .pill {
+        font-size: 12px;
+        background: #0b1220;
+        border: 1px solid #263043;
+        border-radius: 999px;
+        padding: 4px 8px;
+        color: var(--muted);
+      }
+      .danger {
+        color: #fecaca;
+      }
+      .success {
+        color: #bbf7d0;
+      }
+      a {
+        color: #7dd3fc;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
