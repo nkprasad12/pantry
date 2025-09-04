@@ -231,15 +231,24 @@ export function App() {
 
 function ThemeSwitcher({ theme, setTheme }: { theme: string; setTheme: (t: string) => void }) {
   return (
-    <select
-      value={theme}
-      onChange={(e) => setTheme(e.target.value)}
-      style={{ minWidth: 90 }}
-      title="Switch color theme"
-    >
-      <option value="dark">Dark</option>
-      <option value="light">Light</option>
-    </select>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span
+        style={{ fontSize: 18, cursor: 'pointer', opacity: theme === 'dark' ? 1 : 0.5 }}
+        title="Switch to dark theme"
+        onClick={() => theme !== 'dark' && setTheme('dark')}
+        aria-label="Switch to dark theme"
+      >
+        🌙
+      </span>
+      <span
+        style={{ fontSize: 18, cursor: 'pointer', opacity: theme === 'light' ? 1 : 0.5 }}
+        title="Switch to light theme"
+        onClick={() => theme !== 'light' && setTheme('light')}
+        aria-label="Switch to light theme"
+      >
+        🔆
+      </span>
+    </div>
   );
 }
 
