@@ -8,23 +8,6 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.open('pantry-v1').then((cache) => {
-      return cache.match(event.request).then((resp) => {
-        return (
-          resp ||
-          fetch(event.request).then((response) => {
-            if (event.request.method === 'GET' && response.ok && response.type === 'basic') {
-              cache.put(event.request, response.clone());
-            }
-            return response;
-          })
-        );
-      });
-    }),
-  );
-});
-self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
     fetch(event.request)
