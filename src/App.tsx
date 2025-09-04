@@ -161,6 +161,7 @@ export function App() {
           style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}
         >
           <div className="row" style={{ alignItems: 'center', gap: 10 }}>
+            <h1 style={{ margin: 0 }}>Your Pantry</h1>
             <img
               src="/icons/icon128.png"
               alt="Pantry logo"
@@ -168,7 +169,6 @@ export function App() {
               height={32}
               style={{ display: 'block' }}
             />
-            <h1 style={{ margin: 0 }}>Pantry</h1>
           </div>
           <div className="row" style={{ gap: 8 }}>
             <ThemeSwitcher theme={theme} setTheme={setTheme} />
