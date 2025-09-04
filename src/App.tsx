@@ -3,11 +3,10 @@ import { PantryDB, PantryItem, nowIso, upsertItemsBulk } from './db';
 
 type Filter = {
   query: string;
-  tag: string | 'all';
   status: 'all' | 'ok' | 'low' | 'expired';
 };
 
-const defaultFilter: Filter = { query: '', tag: 'all', status: 'all' };
+const defaultFilter: Filter = { query: '', status: 'all' };
 
 export function App() {
   const [items, setItems] = useState<PantryItem[]>([]);
@@ -16,7 +15,8 @@ export function App() {
   const [theme, setThemeState] = useState(() => {
     if (typeof window !== 'undefined') {
       const stored = window.localStorage.getItem('theme');
-      if (stored === 'dark' || stored === 'fun') return stored === 'fun' ? 'light' : stored;
+      const useLight = stored === 'light' || stored === 'fun';
+      return useLight ? 'light' : 'dark';
     }
     return 'dark';
   });
@@ -44,21 +44,16 @@ export function App() {
     }
   }, [theme]);
 
-  // Collect all tags from all items
-  const tags = useMemo(() => {
-    const s = new Set<string>();
-    items.forEach((i) => Array.isArray(i.tags) && i.tags.forEach((t: string) => t && s.add(t)));
-    return ['all', ...Array.from(s).sort()];
-  }, [items]);
-
   const filtered = useMemo(() => {
     const q = filter.query.trim().toLowerCase();
     const today = new Date();
     return items
       .filter((i) => {
-        const matchesQuery = !q || `${i.name} ${i.notes ?? ''}`.toLowerCase().includes(q);
-        const matchesTag =
-          filter.tag === 'all' || (Array.isArray(i.tags) && i.tags.includes(filter.tag));
+        const matchesQuery =
+          !q ||
+          `${i.name} ${i.notes ?? ''} ${Array.isArray(i.tags) ? i.tags.join(' ') : ''}`
+            .toLowerCase()
+            .includes(q);
         const expired = i.expiresAt ? new Date(i.expiresAt) < today : false;
         const low = i.quantity <= (i.minThreshold ?? 0);
         const matchesStatus =
@@ -69,7 +64,7 @@ export function App() {
               : filter.status === 'low'
                 ? low && !expired
                 : !expired && !low;
-        return matchesQuery && matchesTag && matchesStatus;
+        return matchesQuery && matchesStatus;
       })
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [items, filter]);
@@ -170,19 +165,12 @@ export function App() {
             />
           </div>
           <div className="row" style={{ gap: 8, alignItems: 'center' }}>
-            <span style={{ fontSize: 14 }}>Theme:</span>
             <ThemeSwitcher theme={theme} setTheme={setTheme} />
-            {/* @ts-ignore */}
-            {import.meta.env.DEV && (
-              <button className="ghost" onClick={seedDemo}>
-                Seed demo
-              </button>
-            )}
           </div>
         </header>
 
         <div className="card" style={{ marginBottom: 12 }}>
-          <Filters tags={tags} value={filter} onChange={setFilter} />
+          <Filters value={filter} onChange={setFilter} />
         </div>
 
         <div
@@ -195,8 +183,14 @@ export function App() {
             aria-expanded={showAdd}
             aria-controls="add-item-form"
           >
-            {showAdd ? 'Hide Add Item' : 'Add New Item'}
+            {showAdd ? 'Hide Add Item' : 'Add Item'}
           </button>
+          {/* @ts-ignore */}
+          {import.meta.env.DEV && (
+            <button className="ghost" onClick={seedDemo}>
+              Demo
+            </button>
+          )}
           <span className="muted" style={{ fontSize: 15 }}>
             {totalCount} item{totalCount === 1 ? '' : 's'}
             {lowCount > 0 && (
@@ -252,38 +246,17 @@ function ThemeSwitcher({ theme, setTheme }: { theme: string; setTheme: (t: strin
   );
 }
 
-function Filters({
-  tags,
-  value,
-  onChange,
-}: {
-  tags: string[];
-  value: Filter;
-  onChange: (f: Filter) => void;
-}) {
+function Filters({ value, onChange }: { value: Filter; onChange: (f: Filter) => void }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <label style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <span style={{ fontSize: 12 }}>Search</span>
+        <span style={{ fontSize: 12 }}>Filter by name or tag</span>
         <input
-          placeholder="Search…"
+          placeholder="Start typing an item name or tag"
           value={value.query}
           onChange={(e) => onChange({ ...value, query: e.target.value })}
           style={{ flex: 1, minWidth: 220 }}
         />
-      </label>
-      <label style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <span style={{ fontSize: 12 }}>Tag</span>
-        <select
-          value={value.tag}
-          onChange={(e) => onChange({ ...value, tag: e.target.value as any })}
-        >
-          {tags.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
       </label>
       <label style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <span style={{ fontSize: 12 }}>Status</span>
