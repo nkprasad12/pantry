@@ -13,10 +13,37 @@ export function App() {
   const [items, setItems] = useState<PantryItem[]>([]);
   const [filter, setFilter] = useState<Filter>(defaultFilter);
   const [db] = useState(() => new PantryDB());
+  const [theme, setThemeState] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const stored = window.localStorage.getItem('theme');
+      if (stored === 'light' || stored === 'dark' || stored === 'fun') return stored;
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches)
+        return 'light';
+    }
+    return 'dark';
+  });
+  // Wrap setTheme to persist
+  const setTheme = (t: string) => {
+    setThemeState(t);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('theme', t);
+    }
+  };
 
   useEffect(() => {
     db.getAll().then(setItems);
   }, [db]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    // Also update meta theme-color for mobile
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      if (theme === 'light') meta.setAttribute('content', '#f8fafc');
+      else if (theme === 'fun') meta.setAttribute('content', '#2a183a');
+      else meta.setAttribute('content', '#0f766e');
+    }
+  }, [theme]);
 
   const categories = useMemo(() => {
     const s = new Set<string>();
@@ -126,14 +153,15 @@ export function App() {
         style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}
       >
         <h1 style={{ margin: 0 }}>Pantry</h1>
-        {/* @ts-ignore */}
-        {import.meta.env.DEV && (
-          <div className="row">
+        <div className="row" style={{ gap: 8 }}>
+          <ThemeSwitcher theme={theme} setTheme={setTheme} />
+          {/* @ts-ignore */}
+          {import.meta.env.DEV && (
             <button className="ghost" onClick={seedDemo}>
               Seed demo
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </header>
 
       <div className="card" style={{ marginBottom: 12 }}>
@@ -150,6 +178,21 @@ export function App() {
         ))}
       </div>
     </div>
+  );
+}
+
+function ThemeSwitcher({ theme, setTheme }: { theme: string; setTheme: (t: string) => void }) {
+  return (
+    <select
+      value={theme}
+      onChange={(e) => setTheme(e.target.value)}
+      style={{ minWidth: 90 }}
+      title="Switch color theme"
+    >
+      <option value="dark">Dark</option>
+      <option value="light">Light</option>
+      <option value="fun">Fun</option>
+    </select>
   );
 }
 
