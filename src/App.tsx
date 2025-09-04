@@ -126,11 +126,14 @@ export function App() {
         style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}
       >
         <h1 style={{ margin: 0 }}>Pantry</h1>
-        <div className="row">
-          <button className="ghost" onClick={seedDemo}>
-            Seed demo
-          </button>
-        </div>
+        {/* @ts-ignore */}
+        {import.meta.env.DEV && (
+          <div className="row">
+            <button className="ghost" onClick={seedDemo}>
+              Seed demo
+            </button>
+          </div>
+        )}
       </header>
 
       <div className="card" style={{ marginBottom: 12 }}>
