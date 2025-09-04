@@ -154,62 +154,78 @@ export function App() {
   const lowCount = items.filter((i) => i.quantity <= (i.minThreshold ?? 0)).length;
 
   return (
-    <div className="container">
-      <header
-        className="row"
-        style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}
-      >
-        <h1 style={{ margin: 0 }}>Pantry</h1>
-        <div className="row" style={{ gap: 8 }}>
-          <ThemeSwitcher theme={theme} setTheme={setTheme} />
-          {/* @ts-ignore */}
-          {import.meta.env.DEV && (
-            <button className="ghost" onClick={seedDemo}>
-              Seed demo
-            </button>
-          )}
-        </div>
-      </header>
-
-      <div className="card" style={{ marginBottom: 12 }}>
-        <Filters tags={tags} value={filter} onChange={setFilter} />
-      </div>
-
-      <div
-        className="row"
-        style={{ marginBottom: 12, alignItems: 'center', justifyContent: 'space-between' }}
-      >
-        <button
-          className="ghost"
-          onClick={() => setShowAdd((v) => !v)}
-          aria-expanded={showAdd}
-          aria-controls="add-item-form"
+    <>
+      <div className="container">
+        <header
+          className="row"
+          style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}
         >
-          {showAdd ? 'Hide Add Item' : 'Add New Item'}
-        </button>
-        <span className="muted" style={{ fontSize: 15 }}>
-          {totalCount} item{totalCount === 1 ? '' : 's'}
-          {lowCount > 0 && (
-            <>
-              {' '}
-              | <span className="danger">{lowCount} low</span>
-            </>
-          )}
-        </span>
-      </div>
+          <div className="row" style={{ alignItems: 'center', gap: 10 }}>
+            <img
+              src="/icons/icon128.png"
+              alt="Pantry logo"
+              width={32}
+              height={32}
+              style={{ display: 'block' }}
+            />
+            <h1 style={{ margin: 0 }}>Pantry</h1>
+          </div>
+          <div className="row" style={{ gap: 8 }}>
+            <ThemeSwitcher theme={theme} setTheme={setTheme} />
+            {/* @ts-ignore */}
+            {import.meta.env.DEV && (
+              <button className="ghost" onClick={seedDemo}>
+                Seed demo
+              </button>
+            )}
+          </div>
+        </header>
 
-      {showAdd && (
-        <div className="card" style={{ marginBottom: 12 }} id="add-item-form">
-          <ItemForm onSubmit={handleAdd} />
+        <div className="card" style={{ marginBottom: 12 }}>
+          <Filters tags={tags} value={filter} onChange={setFilter} />
         </div>
-      )}
 
-      <div className="grid">
-        {filtered.map((i) => (
-          <ItemCard key={i.id} item={i} onUpdate={handleEdit} onDelete={handleRemove} />
-        ))}
+        <div
+          className="row"
+          style={{ marginBottom: 12, alignItems: 'center', justifyContent: 'space-between' }}
+        >
+          <button
+            className="ghost"
+            onClick={() => setShowAdd((v) => !v)}
+            aria-expanded={showAdd}
+            aria-controls="add-item-form"
+          >
+            {showAdd ? 'Hide Add Item' : 'Add New Item'}
+          </button>
+          <span className="muted" style={{ fontSize: 15 }}>
+            {totalCount} item{totalCount === 1 ? '' : 's'}
+            {lowCount > 0 && (
+              <>
+                {' '}
+                | <span className="danger">{lowCount} low</span>
+              </>
+            )}
+          </span>
+        </div>
+
+        {showAdd && (
+          <div className="card" style={{ marginBottom: 12 }} id="add-item-form">
+            <ItemForm onSubmit={handleAdd} />
+          </div>
+        )}
+
+        <div className="grid">
+          {filtered.map((i) => (
+            <ItemCard key={i.id} item={i} onUpdate={handleEdit} onDelete={handleRemove} />
+          ))}
+        </div>
       </div>
-    </div>
+      <footer style={{ margin: '32px 0 16px 0', textAlign: 'center', fontSize: 13 }}>
+        <a href="https://www.flaticon.com/free-icons/pantry" title="pantry icons">
+          Pantry icons created by Freepik - Flaticon
+        </a>
+      </footer>
+    </>
   );
 }
 
