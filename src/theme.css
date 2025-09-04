@@ -1,9 +1,11 @@
 :root {
   --bg: #0b1020;
-  --panel: #0f172a;
+  --panel: #18122b;
   --text: #e5e7eb;
-  --muted: #94a3b8;
-  --accent: #0ea5a6;
+  --muted: #a78bfa;
+  --accent: #7c3aed;
+  --accent2: #c084fc;
+  --accent3: #a78bfa;
 }
 html[data-theme='light'] {
   --bg: #f6e6ff;
@@ -28,6 +30,7 @@ html[data-theme='light'] .pill {
 html[data-theme='light'] .muted {
   color: var(--accent3);
 }
+
 html,
 body,
 #root {
@@ -49,6 +52,16 @@ body {
     Arial,
     'Apple Color Emoji',
     'Segoe UI Emoji';
+}
+
+a {
+  color: var(--accent2);
+}
+
+.pill {
+  background: var(--accent3);
+  color: #fff;
+  border: 1px solid var(--accent2);
 }
 .container {
   max-width: 940px;
