@@ -35,10 +35,10 @@ export function ItemCard({
           </button>
           <div style={{ minWidth: 36, textAlign: 'center' }}>
             {item.quantity}
+            {item.needed && <span style={{ marginLeft: 4, color: '#888' }}>/ {item.needed}</span>}
             {item.unit && (
               <span style={{ marginLeft: 4, fontSize: 13, color: '#888' }}>{item.unit}</span>
             )}
-            {item.needed && <span style={{ marginLeft: 4, color: '#888' }}>/ {item.needed}</span>}
           </div>
           <button
             className="ghost"
